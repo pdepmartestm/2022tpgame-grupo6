@@ -3,9 +3,10 @@ import wollok.game.*
 object manchaMania {
 
 	const agujeros = [ agujero1, agujero2, agujero3, agujero4, agujero5 ]
+	const destinos = [destino1, destino2]
 	const personajesj1 = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1 ]
 	const personajesj2 = [ amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
-	const powerUps = [ saltoDoble1, saltoDoble2 ]
+	const powerUps = [ saltoDoble1, saltoDoble2, portal1, portal2 ]
 	const property jugadores = [ jugador1, jugador2 ]
 
 	method menu() {
@@ -29,7 +30,7 @@ object manchaMania {
 	}
 
 	method elegirPersonajes() {
-		game.addVisual(fondo)
+		game.addVisual(aspectos)
 		personajesj1.forEach({ p => game.addVisual(p)})
 		personajesj1.forEach({ p => game.showAttributes(p)})
 		personajesj2.forEach({ p => game.addVisual(p)})
@@ -58,12 +59,11 @@ object manchaMania {
 		game.addVisual(jugador2)
 		agujeros.forEach({ a => game.addVisual(a)})
 		powerUps.forEach({ p => game.addVisual(p)})
+		destinos.forEach({ d => game.addVisual(d)})
 			// game.schedule(10000,{=>game.addVisual(saltoDoble1)})
 			// game.schedule(20000,{=>game.addVisual(saltoDoble2)})
 		powerUps.forEach({ p => game.onCollideDo(p, { jugador1 => p.afectar(jugador1)})})
 		powerUps.forEach({ p => game.onCollideDo(p, { jugador2 => p.afectar(jugador2)})})
-		powerUps.forEach({ p => game.onCollideDo(p, { jugador1 => game.removeVisual(p)})})
-		powerUps.forEach({ p => game.onCollideDo(p, { jugador2 => game.removeVisual(p)})})
 		agujeros.forEach({ a => game.onCollideDo(a, { jugador1 => jugador1.perder()})})
 		agujeros.forEach({ a => game.onCollideDo(a, { jugador1 => jugador2.perder()})})
 		keyboard.up().onPressDo({ jugador1.aArriba()})
@@ -74,7 +74,15 @@ object manchaMania {
 		keyboard.s().onPressDo({ jugador2.aAbajo()})
 		keyboard.d().onPressDo({ jugador2.aLaDerecha()})
 		keyboard.a().onPressDo({ jugador2.aLaIzquierda()})
-	// game.onCollideDo(jugador1, { jugador2 => jugador2.ganar(trofeoJ2)})
+	
+		game.onCollideDo(jugador2, { jugador1 => jugador2.atrapar()})
+	}
+
+	method fin() {
+		game.addVisual(fondo)
+		game.addVisual(finalizarJuego)
+		game.showAttributes(finalizarJuego)
+		keyboard.control().onPressDo({ game.stop()})
 	}
 
 	method mostrarReglas() {
@@ -93,6 +101,13 @@ object fondo {
 
 	const property position = game.origin()
 	const property image = "fondo.jpg"
+
+}
+
+object aspectos {
+
+	const property position = game.origin()
+	const property image = "personajes.png"
 
 }
 
@@ -116,6 +131,8 @@ const menuJugar = new Opcion(presione = "Tecla Space", position = game.at(4, 8),
 const menuReglas = new Opcion(presione = "Tecla Enter", position = game.at(4, 5), image = "reglas.jpg")
 
 const menuCreadores = new Opcion(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.jpg")
+
+const finalizarJuego = new Opcion(presione = "Tecla control", position = game.at(5,5), image = "finalizarJuego.png")
 
 object mapa {
 
@@ -211,6 +228,11 @@ class Jugador {
 	method perder() {
 		game.addVisualCharacterIn(copa, otroJugador.position())
 		game.removeVisual(self)
+		game.schedule(5000, {=> manchaMania.fin()})
+	}
+	
+	method moverseA(destino){
+		position = destino.position()
 	}
 
 }
@@ -231,6 +253,7 @@ object jugador1 inherits Jugador(position = game.origin(), turno = 1, otroJugado
 	method sobrevivir() {
 		game.addVisualCharacterIn(copa, self.position())
 		game.removeVisual(otroJugador)
+		game.schedule(5000, {=> manchaMania.fin()})
 	}
 
 }
@@ -238,15 +261,16 @@ object jugador1 inherits Jugador(position = game.origin(), turno = 1, otroJugado
 object jugador2 inherits Jugador(position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1) {
 
 	method atrapar() {
-		game.onCollideDo(self, { jugador1 => game.removeVisual(jugador1)})
+		game.removeVisual(otroJugador)
 		game.addVisualCharacterIn(cadaver, self.position())
+		game.schedule(5000, {=> manchaMania.fin()})
 	}
 
 }
 
 object cadaver {
 
-	const property image = "cadaverCeleste.png" // estaria bueno que cada color tenga su cadaver, pero no encontre imagenes png de todos
+	const property image = "cadaver.png" // estaria bueno que cada color tenga su cadaver, pero no encontre imagenes png de todos
 
 }
 
@@ -287,6 +311,7 @@ class SaltoDoble {
 
 	method afectar(jugador) {
 		jugador.dobleTurno()
+		game.removeVisual(self)
 	}
 
 }
@@ -295,4 +320,28 @@ const saltoDoble1 = new SaltoDoble(position = game.at(10, 4), image = "saltoDobl
 
 const saltoDoble2 = new SaltoDoble(position = game.at(1, 9), image = "saltoDoble.png")
 
+
+class Portal{
+	
+	const property position
+	const property image
+	const property destino
+
+	method afectar(jugador) {
+	jugador.moverseA(destino)
+	}
+}
+
+const portal1 = new Portal(position = game.at(1,3), image = "portal.png",destino=destino1)
+const portal2 = new Portal(position = game.at(9,8), image = "portal.png",destino=destino2)
+
+class Destino{
+	const property position
+	const property image
+}
+
+const destino1 = new Destino(position = game.at(7,12),image = "destino.png")
+const destino2 = new Destino(position = game.at(11,10), image = "destino.png")
+
 //POWER UP QUE CAMBIE QUIEN PERSIGUE Y QUIEN ATRAPA?
+//PORTALES?
