@@ -3,11 +3,11 @@ import wollok.game.*
 object manchaMania {
 
 	const agujeros = [ agujero1, agujero2, agujero3, agujero4, agujero5 ]
-	const destinos = [destino1, destino2]
-	const personajesj1 = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1 ]
-	const personajesj2 = [ amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
-	const powerUps = [ saltoDoble1, saltoDoble2, portal1, portal2 ]
+	const destinos = [ destino1, destino2 ]
+	const personajes = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1, amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
+	const powerUps = [ saltoDoble1, saltoDoble2, portal1, portal2, vidaExtra1 ]
 	const property jugadores = [ jugador1, jugador2 ]
+	const property opciones = [ menuJugar, menuReglas, menuCreadores ]
 
 	method menu() {
 		game.title("Mancha Mania")
@@ -15,13 +15,9 @@ object manchaMania {
 		game.height(13)
 		game.width(18)
 		game.addVisual(bot)
-		game.addVisual(menuJugar)
-		game.addVisual(menuReglas)
-		game.addVisual(menuCreadores)
+		opciones.forEach({ o => game.addVisual(o)})
 		game.say(bot, "Seleccione una Opcion, presione DEL para volver")
-		game.showAttributes(menuJugar)
-		game.showAttributes(menuReglas)
-		game.showAttributes(menuCreadores)
+		opciones.forEach({ o => game.showAttributes(o)})
 		game.showAttributes(bot)
 		keyboard.space().onPressDo({ self.elegirPersonajes()})
 		keyboard.enter().onPressDo({ self.mostrarReglas()})
@@ -31,41 +27,30 @@ object manchaMania {
 
 	method elegirPersonajes() {
 		game.addVisual(aspectos)
-		personajesj1.forEach({ p => game.addVisual(p)})
-		personajesj1.forEach({ p => game.showAttributes(p)})
-		personajesj2.forEach({ p => game.addVisual(p)})
-		personajesj2.forEach({ p => game.showAttributes(p)})
-		keyboard.num1().onPressDo({ jugador1.imagenJugador(amongUsRojo1.image())})
-		keyboard.num1().onPressDo({ game.removeVisual(amongUsRojo1)})
-		keyboard.num2().onPressDo({ jugador1.imagenJugador(amongUsVerde1.image())})
-		keyboard.num2().onPressDo({ game.removeVisual(amongUsVerde1)})
-		keyboard.num3().onPressDo({ jugador1.imagenJugador(amongUsCeleste1.image())})
-		keyboard.num3().onPressDo({ game.removeVisual(amongUsCeleste1)})
-		keyboard.num4().onPressDo({ jugador1.imagenJugador(amongUsArcoIris1.image())})
-		keyboard.num4().onPressDo({ game.removeVisual(amongUsArcoIris1)})
-		keyboard.num5().onPressDo({ jugador2.imagenJugador(amongUsRojo2.image())})
-		keyboard.num5().onPressDo({ game.removeVisual(amongUsRojo2)})
-		keyboard.num6().onPressDo({ jugador2.imagenJugador(amongUsVerde2.image())})
-		keyboard.num6().onPressDo({ game.removeVisual(amongUsVerde2)})
-		keyboard.num7().onPressDo({ jugador2.imagenJugador(amongUsCeleste2.image())})
-		keyboard.num7().onPressDo({ game.removeVisual(amongUsCeleste2)})
-		keyboard.num8().onPressDo({ jugador2.imagenJugador(amongUsArcoIris2.image())})
-		keyboard.num8().onPressDo({ game.removeVisual(amongUsArcoIris2)})
+		personajes.forEach({ p => game.addVisual(p)})
+		personajes.forEach({ p => game.showAttributes(p)})
+		keyboard.num1().onPressDo({ jugador1.imagenJugador(amongUsRojo1)})
+		keyboard.num2().onPressDo({ jugador1.imagenJugador(amongUsVerde1)})
+		keyboard.num3().onPressDo({ jugador1.imagenJugador(amongUsCeleste1)})
+		keyboard.num4().onPressDo({ jugador1.imagenJugador(amongUsArcoIris1)})
+		keyboard.num5().onPressDo({ jugador2.imagenJugador(amongUsRojo2)})
+		keyboard.num6().onPressDo({ jugador2.imagenJugador(amongUsVerde2)})
+		keyboard.num7().onPressDo({ jugador2.imagenJugador(amongUsCeleste2)})
+		keyboard.num8().onPressDo({ jugador2.imagenJugador(amongUsArcoIris2)})
 	}
 
 	method jugar() {
+		opciones.forEach({ o => game.removeVisual(o)})
+		game.removeVisual(aspectos)
+		personajes.forEach({ p => game.removeVisual(p)}) // para evitar interacciones, sacamos todo lo que no se utiliza mas
 		game.addVisual(mapa)
 		game.addVisual(jugador1)
 		game.addVisual(jugador2)
 		agujeros.forEach({ a => game.addVisual(a)})
 		powerUps.forEach({ p => game.addVisual(p)})
 		destinos.forEach({ d => game.addVisual(d)})
-			// game.schedule(10000,{=>game.addVisual(saltoDoble1)})
-			// game.schedule(20000,{=>game.addVisual(saltoDoble2)})
-		powerUps.forEach({ p => game.onCollideDo(p, { jugador1 => p.afectar(jugador1)})})
-		powerUps.forEach({ p => game.onCollideDo(p, { jugador2 => p.afectar(jugador2)})})
-		agujeros.forEach({ a => game.onCollideDo(a, { jugador1 => jugador1.perder()})})
-		agujeros.forEach({ a => game.onCollideDo(a, { jugador1 => jugador2.perder()})})
+		powerUps.forEach({ p => game.onCollideDo(p, { jugador => p.afectar(jugador)})}) //hacer q las interacciones funciones siempre igual con el mismo metodo
+		agujeros.forEach({ a => game.onCollideDo(a, { jugador => jugador.caerse()})})
 		keyboard.up().onPressDo({ jugador1.aArriba()})
 		keyboard.down().onPressDo({ jugador1.aAbajo()})
 		keyboard.right().onPressDo({ jugador1.aLaDerecha()})
@@ -74,8 +59,7 @@ object manchaMania {
 		keyboard.s().onPressDo({ jugador2.aAbajo()})
 		keyboard.d().onPressDo({ jugador2.aLaDerecha()})
 		keyboard.a().onPressDo({ jugador2.aLaIzquierda()})
-	
-		game.onCollideDo(jugador2, { jugador1 => jugador2.atrapar()})
+		game.onCollideDo(jugador2, { jugador1 => jugador2.atrapar(jugador1)}) // revisar esta parte
 	}
 
 	method fin() {
@@ -93,6 +77,10 @@ object manchaMania {
 	method mostrarCreadores() {
 		game.addVisual(infoCreadores)
 		keyboard.del().onPressDo({ game.removeVisual(infoCreadores)})
+	}
+
+	method quitarDeLista(personaje) {
+		personajes.remove(personaje)
 	}
 
 }
@@ -132,7 +120,7 @@ const menuReglas = new Opcion(presione = "Tecla Enter", position = game.at(4, 5)
 
 const menuCreadores = new Opcion(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.jpg")
 
-const finalizarJuego = new Opcion(presione = "Tecla control", position = game.at(5,5), image = "finalizarJuego.png")
+const finalizarJuego = new Opcion(presione = "Tecla control", position = game.at(5, 5), image = "finalizarJuego.png")
 
 object mapa {
 
@@ -173,14 +161,18 @@ const agujero6 = new Obstaculo(position = game.at(10, 7), image = "agujero.png")
 
 class Jugador {
 
+	var property vida
 	var property position
 	var property image = ""
 	var property turno
 	const property otroJugador
 	var property salto
+	const respawn
 
-	method imagenJugador(imagen) {
-		image = imagen
+	method imagenJugador(personaje) {
+		image = personaje.image()
+		game.removeVisual(personaje)
+		manchaMania.quitarDeLista(personaje) // para evitar que colisione con otros obejtos
 	}
 
 	method aArriba() {
@@ -225,19 +217,36 @@ class Jugador {
 		salto *= 2 // por alguna razon se mueve 4 veces en lugar de 2
 	}
 
-	method perder() {
-		game.addVisualCharacterIn(copa, otroJugador.position())
+	method perder(premio) {
 		game.removeVisual(self)
+		otroJugador.ganar(premio)
 		game.schedule(5000, {=> manchaMania.fin()})
 	}
-	
-	method moverseA(destino){
+
+	method ganar(premio) {
+		game.addVisualCharacterIn(premio, self.position())
+	}
+
+	method moverseA(destino) {
 		position = destino.position()
+	}
+
+	method caerse() {
+		if (vida == 1) {
+			self.perder(copa)
+		} else {
+			self.moverseA(respawn)
+			vida -= 1
+		}
+	}
+
+	method sumarseVida() {
+		vida += 1
 	}
 
 }
 
-object jugador1 inherits Jugador(position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1) {
+object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1, respawn = respawnJ1) {
 
 	var property movimientos = 0 // de esta manera sabemos cuantas veces se movio
 
@@ -251,19 +260,15 @@ object jugador1 inherits Jugador(position = game.origin(), turno = 1, otroJugado
 	}
 
 	method sobrevivir() {
-		game.addVisualCharacterIn(copa, self.position())
-		game.removeVisual(otroJugador)
-		game.schedule(5000, {=> manchaMania.fin()})
+		otroJugador.perder(copa)
 	}
 
 }
 
-object jugador2 inherits Jugador(position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1) {
+object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2) {
 
-	method atrapar() {
-		game.removeVisual(otroJugador)
-		game.addVisualCharacterIn(cadaver, self.position())
-		game.schedule(5000, {=> manchaMania.fin()})
+	method atrapar(jugador) {
+		jugador.perder(cadaver)
 	}
 
 }
@@ -320,28 +325,53 @@ const saltoDoble1 = new SaltoDoble(position = game.at(10, 4), image = "saltoDobl
 
 const saltoDoble2 = new SaltoDoble(position = game.at(1, 9), image = "saltoDoble.png")
 
+class Portal {
 
-class Portal{
-	
 	const property position
 	const property image
 	const property destino
 
 	method afectar(jugador) {
-	jugador.moverseA(destino)
+		jugador.moverseA(destino)
 	}
+
 }
 
-const portal1 = new Portal(position = game.at(1,3), image = "portal.png",destino=destino1)
-const portal2 = new Portal(position = game.at(9,8), image = "portal.png",destino=destino2)
+const portal1 = new Portal(position = game.at(1, 3), image = "portal.png", destino = destino1)
 
-class Destino{
+const portal2 = new Portal(position = game.at(9, 8), image = "portal.png", destino = destino2)
+
+class Destino {
+
 	const property position
 	const property image
+
 }
 
-const destino1 = new Destino(position = game.at(7,12),image = "destino.png")
-const destino2 = new Destino(position = game.at(11,10), image = "destino.png")
+const destino1 = new Destino(position = game.at(7, 12), image = "destino.png")
 
-//POWER UP QUE CAMBIE QUIEN PERSIGUE Y QUIEN ATRAPA?
-//PORTALES?
+const destino2 = new Destino(position = game.at(11, 10), image = "destino.png")
+
+class VidaExtra {
+
+	const property position
+	const property image
+
+	method afectar(jugador) {
+		jugador.sumarseVida()
+		game.removeVisual(self)
+	}
+
+}
+
+const vidaExtra1 = new VidaExtra(position = game.at(9, 7), image = "corazon.png")
+
+class Respawn {
+
+	const property position = game.at(1, 11)
+
+}
+
+const respawnJ1 = new Respawn(position = game.origin())
+
+const respawnJ2 = new Respawn(position = game.at(14, 11))
