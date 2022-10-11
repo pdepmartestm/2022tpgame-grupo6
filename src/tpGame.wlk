@@ -46,11 +46,11 @@ object manchaMania {
 		game.addVisual(mapa)
 		game.addVisual(jugador1)
 		game.addVisual(jugador2)
-		agujeros.forEach({ a => game.addVisual(a)})
-		powerUps.forEach({ p => game.addVisual(p)})
-		destinos.forEach({ d => game.addVisual(d)})
-		powerUps.forEach({ p => game.onCollideDo(p, { jugador => p.afectar(jugador)})}) //hacer q las interacciones funciones siempre igual con el mismo metodo
-		agujeros.forEach({ a => game.onCollideDo(a, { jugador => jugador.caerse()})})
+		
+		game.schedule(5000,{=>self.aparecer()})
+		
+		//powerUps.forEach({ p => game.onCollideDo(p, { jugador => p.afectar(jugador)})}) //hacer q las interacciones funciones siempre igual con el mismo metodo
+		//agujeros.forEach({ a => game.onCollideDo(a, { jugador => jugador.caerse()})})
 		keyboard.up().onPressDo({ jugador1.aArriba()})
 		keyboard.down().onPressDo({ jugador1.aAbajo()})
 		keyboard.right().onPressDo({ jugador1.aLaDerecha()})
@@ -59,7 +59,16 @@ object manchaMania {
 		keyboard.s().onPressDo({ jugador2.aAbajo()})
 		keyboard.d().onPressDo({ jugador2.aLaDerecha()})
 		keyboard.a().onPressDo({ jugador2.aLaIzquierda()})
-		game.onCollideDo(jugador2, { jugador1 => jugador2.atrapar(jugador1)}) // revisar esta parte
+		//game.onCollideDo(jugador2, { jugador1 => jugador2.atrapar(jugador1)}) // revisar esta parte
+	}
+	
+	method aparecer(){
+		agujeros.forEach({ a => game.addVisual(a)})
+		powerUps.forEach({ p => game.addVisual(p)})
+		destinos.forEach({ d => game.addVisual(d)})
+		
+		
+		jugadores.forEach({j=> game.onCollideDo(j,{algo => algo.afectar(j)})})
 	}
 
 	method fin() {
@@ -144,6 +153,10 @@ class Obstaculo {
 
 	const property position
 	const property image
+	
+	method afectar(jugador){
+		jugador.caerse()
+	}
 
 }
 
@@ -250,6 +263,11 @@ object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, 
 
 	var property movimientos = 0 // de esta manera sabemos cuantas veces se movio
 
+
+	method afectar(jugador){
+		jugador.afectar(self)
+	}
+	
 	override method sumarTurno() {
 		super()
 		movimientos += 1
@@ -267,7 +285,7 @@ object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, 
 
 object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2) {
 
-	method atrapar(jugador) {
+	method afectar(jugador) {
 		jugador.perder(cadaver)
 	}
 
