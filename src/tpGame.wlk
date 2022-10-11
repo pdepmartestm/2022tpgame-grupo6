@@ -3,9 +3,10 @@ import wollok.game.*
 object manchaMania {
 
 	const agujeros = [ agujero1, agujero2, agujero3, agujero4, agujero5 ]
-	const destinos = [ destino1, destino2 ]
+	const portales = [ portal1, portal2, destino1, destino2 ]
+	const saltosDobles = [saltoDoble1, saltoDoble2]
 	const personajes = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1, amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
-	const powerUps = [ saltoDoble1, saltoDoble2, portal1, portal2, vidaExtra1 ]
+	const vidasExtras = [ vidaExtra1 ]
 	const property jugadores = [ jugador1, jugador2 ]
 	const property opciones = [ menuJugar, menuReglas, menuCreadores ]
 
@@ -47,10 +48,17 @@ object manchaMania {
 		game.addVisual(jugador1)
 		game.addVisual(jugador2)
 		
-		game.schedule(5000,{=>self.aparecer()})
+		game.schedule(5000,{=>agujeros.forEach({ a => game.addVisual(a)})})
+		game.schedule(10000,{=>portales.forEach({ p => game.addVisual(p)})})
+		game.schedule(15000,{=>saltosDobles.forEach({ d => game.addVisual(d)})})
+		game.schedule(20000,{=>vidasExtras.forEach({v => game.addVisual(v)})})
 		
-		//powerUps.forEach({ p => game.onCollideDo(p, { jugador => p.afectar(jugador)})}) //hacer q las interacciones funciones siempre igual con el mismo metodo
-		//agujeros.forEach({ a => game.onCollideDo(a, { jugador => jugador.caerse()})})
+		
+		//jugadores.forEach({j=> game.onCollideDo(j,{algo => algo.afectar(j)})})
+		game.onCollideDo(jugador1,{algo => algo.afectar(jugador1)})
+		game.onCollideDo(jugador2,{algo => algo.afectar(jugador2)})
+		
+		
 		keyboard.up().onPressDo({ jugador1.aArriba()})
 		keyboard.down().onPressDo({ jugador1.aAbajo()})
 		keyboard.right().onPressDo({ jugador1.aLaDerecha()})
@@ -59,18 +67,9 @@ object manchaMania {
 		keyboard.s().onPressDo({ jugador2.aAbajo()})
 		keyboard.d().onPressDo({ jugador2.aLaDerecha()})
 		keyboard.a().onPressDo({ jugador2.aLaIzquierda()})
-		//game.onCollideDo(jugador2, { jugador1 => jugador2.atrapar(jugador1)}) // revisar esta parte
+
 	}
 	
-	method aparecer(){
-		agujeros.forEach({ a => game.addVisual(a)})
-		powerUps.forEach({ p => game.addVisual(p)})
-		destinos.forEach({ d => game.addVisual(d)})
-		
-		
-		jugadores.forEach({j=> game.onCollideDo(j,{algo => algo.afectar(j)})})
-	}
-
 	method fin() {
 		game.addVisual(fondo)
 		game.addVisual(finalizarJuego)
@@ -133,7 +132,7 @@ const finalizarJuego = new Opcion(presione = "Tecla control", position = game.at
 
 object mapa {
 
-	const property position = game.origin()
+	const property position = game.at(-1,-1)
 	const property image = "mapa.jpg"
 
 }
@@ -189,34 +188,46 @@ class Jugador {
 	}
 
 	method aArriba() {
-		if (turno > 0) {
+		if (turno > 0 && self.position().y()<12) {
 			position = position.up(1)
 			turno = turno - 1
 			otroJugador.sumarTurno()
 		}
+		else{
+			game.say(self,"No puedo moverme :(") //ya sea porque no es su turno o porque se estaria yendo del mapa
+		}
 	}
 
 	method aLaDerecha() {
-		if (turno > 0) {
+		if (turno > 0 && self.position().x()<16) {
 			position = position.right(1)
 			turno = turno - 1
 			otroJugador.sumarTurno()
 		}
+		else{
+			game.say(self,"No puedo moverme :(")
+		}
 	}
 
 	method aLaIzquierda() {
-		if (turno > 0) {
+		if (turno > 0 && self.position().x()>0) {
 			position = position.left(1)
 			turno = turno - 1
 			otroJugador.sumarTurno()
 		}
+		else{
+			game.say(self,"No puedo moverme :(")
+		}
 	}
 
 	method aAbajo() {
-		if (turno > 0) {
+		if (turno > 0 && self.position().y()>0) {
 			position = position.down(1)
 			turno = turno - 1
 			otroJugador.sumarTurno()
+		}
+		else{
+			game.say(self,"No puedo moverme :(")
 		}
 	}
 
@@ -273,7 +284,7 @@ object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, 
 		movimientos += 1
 		if (movimientos == 50) {
 			self.sobrevivir()
-			game.say(self, "50 MOVIMIENTOS!")
+			game.say(self, "AL FIN 50 MOVIMIENTOS!")
 		}
 	}
 
@@ -294,12 +305,19 @@ object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0
 object cadaver {
 
 	const property image = "cadaver.png" // estaria bueno que cada color tenga su cadaver, pero no encontre imagenes png de todos
-
+	
+	method afectar(jugador){ //de esta manera cuando aparece al final, no salta el mensaje de error
+		
+	}
 }
 
 object copa {
 
 	const property image = "trofeo.png"
+	
+	method afectar(jugador){//de esta manera cuando aparece al final, no salta el mensaje de error
+		
+	}
 
 }
 
@@ -363,6 +381,10 @@ class Destino {
 
 	const property position
 	const property image
+	
+	method afectar(jugador){ //para evitar que salte un mensaje al pasar por encima consultar si esta bien dejarlo asi
+	game.say(self,"Yo soy la salida")
+	}
 
 }
 
@@ -393,3 +415,7 @@ class Respawn {
 const respawnJ1 = new Respawn(position = game.origin())
 
 const respawnJ2 = new Respawn(position = game.at(14, 11))
+
+
+
+//otro obstaculo podrian ser unas paredes/vayas que no te permitan moverte hacia donde estan, misma logica que los limites del mapa
