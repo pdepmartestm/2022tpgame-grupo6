@@ -1,12 +1,7 @@
 import wollok.game.*
 
 object manchaMania {
-
-	const agujeros = [ agujero1, agujero2, agujero3, agujero4, agujero5 ]
-	const portales = [ portal1, portal2, destino1, destino2 ]
-	const saltosDobles = [saltoDoble1, saltoDoble2]
 	const personajes = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1, amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
-	const vidasExtras = [ vidaExtra1 ]
 	const property jugadores = [ jugador1, jugador2 ]
 	const property opciones = [ menuJugar, menuReglas, menuCreadores ]
 
@@ -23,10 +18,10 @@ object manchaMania {
 		keyboard.space().onPressDo({ self.elegirPersonajes()})
 		keyboard.enter().onPressDo({ self.mostrarReglas()})
 		keyboard.shift().onPressDo({ self.mostrarCreadores()})
-		keyboard.alt().onPressDo({ self.jugar()})
 	}
 
 	method elegirPersonajes() {
+		opciones.forEach({ o => game.removeVisual(o)})
 		game.addVisual(aspectos)
 		personajes.forEach({ p => game.addVisual(p)})
 		personajes.forEach({ p => game.showAttributes(p)})
@@ -38,23 +33,10 @@ object manchaMania {
 		keyboard.num6().onPressDo({ jugador2.imagenJugador(amongUsVerde2)})
 		keyboard.num7().onPressDo({ jugador2.imagenJugador(amongUsCeleste2)})
 		keyboard.num8().onPressDo({ jugador2.imagenJugador(amongUsArcoIris2)})
+		keyboard.alt().onPressDo({ self.elegirMapa()})
 	}
 
 	method jugar() {
-		opciones.forEach({ o => game.removeVisual(o)})
-		game.removeVisual(aspectos)
-		personajes.forEach({ p => game.removeVisual(p)}) // para evitar interacciones, sacamos todo lo que no se utiliza mas
-		game.addVisual(mapa)
-		game.addVisual(jugador1)
-		game.addVisual(jugador2)
-		
-		game.schedule(5000,{=>agujeros.forEach({ a => game.addVisual(a)})})
-		game.schedule(10000,{=>portales.forEach({ p => game.addVisual(p)})})
-		game.schedule(15000,{=>saltosDobles.forEach({ d => game.addVisual(d)})})
-		game.schedule(20000,{=>vidasExtras.forEach({v => game.addVisual(v)})})
-		
-		
-		//jugadores.forEach({j=> game.onCollideDo(j,{algo => algo.afectar(j)})})
 		game.onCollideDo(jugador1,{algo => algo.afectar(jugador1)})
 		game.onCollideDo(jugador2,{algo => algo.afectar(jugador2)})
 		
@@ -68,6 +50,40 @@ object manchaMania {
 		keyboard.d().onPressDo({ jugador2.aLaDerecha()})
 		keyboard.a().onPressDo({ jugador2.aLaIzquierda()})
 
+	}
+	
+	method elegirMapa(){
+		game.removeVisual(aspectos)
+		personajes.forEach({ p => game.removeVisual(p)}) // para evitar interacciones, sacamos todo lo que no se utiliza mas
+		
+		game.addVisual(fondo)
+		game.addVisual(mapaChiquito1)
+		game.addVisual(mapaChiquito2)
+		game.addVisual(mapaChiquito3)
+		
+		keyboard.j().onPressDo({self.mapa(mapa1)})
+		keyboard.k().onPressDo({self.mapa(mapa2)})
+		keyboard.l().onPressDo({self.mapa(mapa3)})
+	}
+	
+	method mapa(mapaX){
+		game.removeVisual(mapaChiquito1)
+		game.removeVisual(mapaChiquito2)
+		game.removeVisual(mapaChiquito3)
+		game.removeVisual(fondo)
+		
+		game.addVisual(mapaX)
+		mapaX.interacciones()
+		game.addVisual(jugador1)
+		game.addVisual(jugador2)
+		self.jugar()
+	}
+	
+	method agregarInteraccion(agujeros,saltosDoble,portales,vidasExtra){
+		game.schedule(5000,{=>agujeros.forEach({ a => game.addVisual(a)})})
+		game.schedule(10000,{=>portales.forEach({ p => game.addVisual(p)})})
+		game.schedule(15000,{=>saltosDoble.forEach({ d => game.addVisual(d)})})
+		game.schedule(20000,{=>vidasExtra.forEach({v => game.addVisual(v)})})
 	}
 	
 	method fin() {
@@ -92,6 +108,40 @@ object manchaMania {
 	}
 
 }
+
+class MapaChiquito{
+	
+	const property position 
+	const property image 
+	
+}
+
+const mapaChiquito1 = new MapaChiquito(position = game.at(2,4),image = "mapaChiquito1.jpg")
+const mapaChiquito2 = new MapaChiquito(position = game.at(7,4),image = "mapaChiquito2.jpg")
+const mapaChiquito3 = new MapaChiquito(position = game.at(12,4),image = "mapaChiquito3.jpg")
+
+
+class Mapa{
+	const property position
+	const property image
+	const property agujeros
+	const property saltosDobles
+	const property portales
+	const property vidasExtra
+
+	method afectar(jugador){ //para evitar un mensaje de error
+		
+	}
+	
+	method interacciones(){
+		manchaMania.agregarInteraccion(agujeros,saltosDobles,portales,vidasExtra)
+	}
+}
+
+const mapa1 = new Mapa(position = game.origin(),image = "mapa1.jpg",agujeros =[agujero1,agujero2],saltosDobles = [saltoDoble1],portales = [portal1,destino1],vidasExtra = [vidaExtra1])
+const mapa2 = new Mapa(position = game.origin(),image = "mapa2.jpg",agujeros =[agujero1,agujero4],saltosDobles = [saltoDoble2],portales = [portal2,destino2],vidasExtra = [vidaExtra1])
+const mapa3 = new Mapa(position = game.origin(),image = "mapa3.png",agujeros =[agujero3,agujero5],saltosDobles = [saltoDoble1,saltoDoble2],portales = [portal1,portal2,destino1,destino2],vidasExtra = [vidaExtra1])
+
 
 object fondo {
 
@@ -352,6 +402,7 @@ class SaltoDoble {
 
 	method afectar(jugador) {
 		jugador.dobleTurno()
+		game.say(jugador,"Doble Salto")
 		game.removeVisual(self)
 	}
 
@@ -399,6 +450,7 @@ class VidaExtra {
 
 	method afectar(jugador) {
 		jugador.sumarseVida()
+		game.say(jugador,"Vida Extra")
 		game.removeVisual(self)
 	}
 
