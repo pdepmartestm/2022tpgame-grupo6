@@ -140,7 +140,7 @@ class Mapa{
 
 const mapa1 = new Mapa(position = game.origin(),image = "mapa1.jpg",agujeros =[agujero1,agujero2],saltosDobles = [saltoDoble1],portales = [portal1,destino1],vidasExtra = [vidaExtra1])
 const mapa2 = new Mapa(position = game.origin(),image = "mapa2.jpg",agujeros =[agujero1,agujero4],saltosDobles = [saltoDoble2],portales = [portal2,destino2],vidasExtra = [vidaExtra1])
-const mapa3 = new Mapa(position = game.origin(),image = "mapa3.png",agujeros =[agujero3,agujero5],saltosDobles = [saltoDoble1,saltoDoble2],portales = [portal1,portal2,destino1,destino2],vidasExtra = [vidaExtra1])
+const mapa3 = new Mapa(position = game.origin(),image = "mapa3.jpg",agujeros =[agujero3,agujero5],saltosDobles = [saltoDoble1,saltoDoble2],portales = [portal1,portal2,destino1,destino2],vidasExtra = [vidaExtra1])
 
 
 object fondo {
