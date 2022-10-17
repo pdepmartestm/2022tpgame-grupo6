@@ -7,7 +7,7 @@ object manchaMania {
 
 	method menu() {
 		game.title("Mancha Mania")
-		game.boardGround("pantallaInicio.jpg")
+		game.boardGround("fondo.jpg")
 		game.height(13)
 		game.width(18)
 		game.addVisual(bot)
@@ -21,8 +21,8 @@ object manchaMania {
 	}
 
 	method elegirPersonajes() {
-		opciones.forEach({ o => game.removeVisual(o)})
 		game.addVisual(aspectos)
+		game.say(bot, "Elijan sus aspectos")
 		personajes.forEach({ p => game.addVisual(p)})
 		personajes.forEach({ p => game.showAttributes(p)})
 		keyboard.num1().onPressDo({ jugador1.imagenJugador(amongUsRojo1)})
@@ -34,6 +34,8 @@ object manchaMania {
 		keyboard.num7().onPressDo({ jugador2.imagenJugador(amongUsCeleste2)})
 		keyboard.num8().onPressDo({ jugador2.imagenJugador(amongUsArcoIris2)})
 		keyboard.alt().onPressDo({ self.elegirMapa()})
+		keyboard.del().onPressDo({game.removeVisual(aspectos)})
+		keyboard.del().onPressDo({personajes.forEach({p=>game.removeVisual(p)})})
 	}
 
 	method jugar() {
@@ -53,13 +55,17 @@ object manchaMania {
 	}
 	
 	method elegirMapa(){
+		game.say(bot, "Elijan un mapa")
+		opciones.forEach({ o => game.removeVisual(o)})
 		game.removeVisual(aspectos)
 		personajes.forEach({ p => game.removeVisual(p)}) // para evitar interacciones, sacamos todo lo que no se utiliza mas
 		
-		game.addVisual(fondo)
 		game.addVisual(mapaChiquito1)
 		game.addVisual(mapaChiquito2)
 		game.addVisual(mapaChiquito3)
+		game.showAttributes(mapaChiquito1)
+		game.showAttributes(mapaChiquito2)
+		game.showAttributes(mapaChiquito3)
 		
 		keyboard.j().onPressDo({self.mapa(mapa1)})
 		keyboard.k().onPressDo({self.mapa(mapa2)})
@@ -67,10 +73,10 @@ object manchaMania {
 	}
 	
 	method mapa(mapaX){
+		game.removeVisual(bot)
 		game.removeVisual(mapaChiquito1)
 		game.removeVisual(mapaChiquito2)
 		game.removeVisual(mapaChiquito3)
-		game.removeVisual(fondo)
 		
 		game.addVisual(mapaX)
 		mapaX.interacciones()
@@ -87,7 +93,6 @@ object manchaMania {
 	}
 	
 	method fin() {
-		game.addVisual(fondo)
 		game.addVisual(finalizarJuego)
 		game.showAttributes(finalizarJuego)
 		keyboard.control().onPressDo({ game.stop()})
@@ -113,12 +118,13 @@ class MapaChiquito{
 	
 	const property position 
 	const property image 
+	const property presione
 	
 }
 
-const mapaChiquito1 = new MapaChiquito(position = game.at(2,4),image = "mapaChiquito1.jpg")
-const mapaChiquito2 = new MapaChiquito(position = game.at(7,4),image = "mapaChiquito2.jpg")
-const mapaChiquito3 = new MapaChiquito(position = game.at(12,4),image = "mapaChiquito3.jpg")
+const mapaChiquito1 = new MapaChiquito(position = game.at(2,5),image = "mapaChiquito1.jpg",presione = "Tecla j")
+const mapaChiquito2 = new MapaChiquito(position = game.at(7,5),image = "mapaChiquito2.jpg",presione = "Tecla k")
+const mapaChiquito3 = new MapaChiquito(position = game.at(12,5),image = "mapaChiquito3.jpg",presione = "Tecla l")
 
 
 class Mapa{
@@ -138,9 +144,9 @@ class Mapa{
 	}
 }
 
-const mapa1 = new Mapa(position = game.origin(),image = "mapa1.jpg",agujeros =[agujero1,agujero2],saltosDobles = [saltoDoble1],portales = [portal1,destino1],vidasExtra = [vidaExtra1])
-const mapa2 = new Mapa(position = game.origin(),image = "mapa2.jpg",agujeros =[agujero1,agujero4],saltosDobles = [saltoDoble2],portales = [portal2,destino2],vidasExtra = [vidaExtra1])
-const mapa3 = new Mapa(position = game.origin(),image = "mapa3.jpg",agujeros =[agujero3,agujero5],saltosDobles = [saltoDoble1,saltoDoble2],portales = [portal1,portal2,destino1,destino2],vidasExtra = [vidaExtra1])
+const mapa1 = new Mapa(position = game.origin(),image = "mapa1.jpg",agujeros =[agujero1,agujero2,agujero4,agujero8,agujero6],saltosDobles = [saltoDoble1,saltoDoble3],portales = [portal1,destino1,portal2,destino2],vidasExtra = [vidaExtra1,vidaExtra3])
+const mapa2 = new Mapa(position = game.origin(),image = "mapa2.jpg",agujeros =[agujero1,agujero4,agujero3,agujero7],saltosDobles = [saltoDoble2,saltoDoble5],portales = [portal2,destino2,portal4,destino4],vidasExtra = [vidaExtra2])
+const mapa3 = new Mapa(position = game.origin(),image = "mapa3.jpg",agujeros =[agujero3,agujero5,agujero6,agujero8,agujero2],saltosDobles = [saltoDoble1,saltoDoble2,saltoDoble4],portales = [portal1,portal3,destino1,destino3],vidasExtra = [vidaExtra3])
 
 
 object fondo {
@@ -153,18 +159,18 @@ object fondo {
 object aspectos {
 
 	const property position = game.origin()
-	const property image = "personajes.png"
+	const property image = "aspectos.png"
 
 }
 
 object bot {
 
-	const property position = game.at(1, 7)
+	const property position = game.at(1, 12)
 	const property image = "bot.png"
 
 }
 
-class Opcion {
+class Boton {
 
 	const property presione
 	const property position
@@ -172,20 +178,13 @@ class Opcion {
 
 }
 
-const menuJugar = new Opcion(presione = "Tecla Space", position = game.at(4, 8), image = "jugar.jpg")
+const menuJugar = new Boton(presione = "Tecla Space", position = game.at(4, 8), image = "jugar.jpg")
 
-const menuReglas = new Opcion(presione = "Tecla Enter", position = game.at(4, 5), image = "reglas.jpg")
+const menuReglas = new Boton(presione = "Tecla Enter", position = game.at(4, 5), image = "reglas.jpg")
 
-const menuCreadores = new Opcion(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.jpg")
+const menuCreadores = new Boton(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.jpg")
 
-const finalizarJuego = new Opcion(presione = "Tecla control", position = game.at(5, 5), image = "finalizarJuego.png")
-
-object mapa {
-
-	const property position = game.at(-1,-1)
-	const property image = "mapa.jpg"
-
-}
+const finalizarJuego = new Boton(presione = "Tecla control", position = game.at(5, 5), image = "finalizarJuego.png")
 
 class Informacion {
 
@@ -198,7 +197,7 @@ const infoReglas = new Informacion(position = game.at(-1, 0), image = "infoRegla
 
 const infoCreadores = new Informacion(position = game.origin(), image = "infoCreadores.jpg")
 
-class Obstaculo {
+class Agujeros {
 
 	const property position
 	const property image
@@ -209,17 +208,19 @@ class Obstaculo {
 
 }
 
-const agujero1 = new Obstaculo(position = game.at(4, 3), image = "agujero.png")
+const agujero1 = new Agujeros(position = game.at(4, 3), image = "agujero.png")
 
-const agujero2 = new Obstaculo(position = game.at(7, 9), image = "agujero.png")
+const agujero2 = new Agujeros(position = game.at(7, 9), image = "agujero.png")
 
-const agujero3 = new Obstaculo(position = game.at(2, 8), image = "agujero.png")
+const agujero3 = new Agujeros(position = game.at(2, 8), image = "agujero.png")
 
-const agujero4 = new Obstaculo(position = game.at(8, 1), image = "agujero.png")
+const agujero4 = new Agujeros(position = game.at(8, 1), image = "agujero.png")
 
-const agujero5 = new Obstaculo(position = game.at(5, 5), image = "agujero.png")
+const agujero5 = new Agujeros(position = game.at(5, 5), image = "agujero.png")
 
-const agujero6 = new Obstaculo(position = game.at(10, 7), image = "agujero.png")
+const agujero6 = new Agujeros(position = game.at(10, 7), image = "agujero.png")
+const agujero7 = new Agujeros(position = game.at(11, 9), image = "agujero.png")
+const agujero8 = new Agujeros(position = game.at(2, 4), image = "agujero.png")
 
 class Jugador {
 
@@ -322,13 +323,25 @@ class Jugador {
 
 object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1, respawn = respawnJ1) {
 
-	var property movimientos = 0 // de esta manera sabemos cuantas veces se movio
+	
 
 
 	method afectar(jugador){
-		jugador.afectar(self)
+		jugador.perder(cadaver)
 	}
+
+
+}
+
+object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2) {
+
+
+	var property movimientos = 0 // de esta manera sabemos cuantas veces se movio
 	
+	method afectar(jugador) {
+		
+	}
+
 	override method sumarTurno() {
 		super()
 		movimientos += 1
@@ -340,14 +353,6 @@ object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, 
 
 	method sobrevivir() {
 		otroJugador.perder(copa)
-	}
-
-}
-
-object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2) {
-
-	method afectar(jugador) {
-		jugador.perder(cadaver)
 	}
 
 }
@@ -410,7 +415,11 @@ class SaltoDoble {
 
 const saltoDoble1 = new SaltoDoble(position = game.at(10, 4), image = "saltoDoble.png")
 
-const saltoDoble2 = new SaltoDoble(position = game.at(1, 9), image = "saltoDoble.png")
+const saltoDoble2 = new SaltoDoble(position = game.at(5, 8), image = "saltoDoble.png")
+const saltoDoble3 = new SaltoDoble(position = game.at(2, 9), image = "saltoDoble.png")
+const saltoDoble4 = new SaltoDoble(position = game.at(3, 6), image = "saltoDoble.png")
+const saltoDoble5 = new SaltoDoble(position = game.at(7, 9), image = "saltoDoble.png")
+
 
 class Portal {
 
@@ -427,6 +436,8 @@ class Portal {
 const portal1 = new Portal(position = game.at(1, 3), image = "portal.png", destino = destino1)
 
 const portal2 = new Portal(position = game.at(9, 8), image = "portal.png", destino = destino2)
+const portal3 = new Portal(position = game.at(4, 12), image = "portal.png", destino = destino3)
+const portal4 = new Portal(position = game.at(8,2), image = "portal.png", destino = destino4)
 
 class Destino {
 
@@ -441,8 +452,11 @@ class Destino {
 
 const destino1 = new Destino(position = game.at(7, 12), image = "destino.png")
 
-const destino2 = new Destino(position = game.at(11, 10), image = "destino.png")
+const destino2 = new Destino(position = game.at(4, 8), image = "destino.png")
 
+const destino3 = new Destino(position = game.at(10, 2), image = "destino.png")
+
+const destino4 = new Destino(position = game.at(2, 9), image = "destino.png")
 class VidaExtra {
 
 	const property position
@@ -457,6 +471,8 @@ class VidaExtra {
 }
 
 const vidaExtra1 = new VidaExtra(position = game.at(9, 7), image = "corazon.png")
+const vidaExtra2 = new VidaExtra(position = game.at(8, 4), image = "corazon.png")
+const vidaExtra3 = new VidaExtra(position = game.at(3,11), image = "corazon.png")
 
 class Respawn {
 
