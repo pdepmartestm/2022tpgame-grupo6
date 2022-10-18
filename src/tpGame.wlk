@@ -1,4 +1,9 @@
 import wollok.game.*
+import imagenes.*
+import interacciones.*
+import botones.*
+import mapas.*
+import corazones.*
 
 object manchaMania {
 
@@ -79,10 +84,13 @@ object manchaMania {
 		mapaX.interacciones()
 		game.addVisual(jugador1)
 		game.addVisual(jugador2)
+		game.addVisual(corazonJ11)
+		game.addVisual(corazonJ21)
 		self.jugar()
 	}
 
 	method agregarInteraccion(agujeros, saltosDoble, portales, vidasExtra) {
+		// game.schedule(1000, {=> agregarUnVisual(colecciones))
 		game.schedule(5000, {=> agujeros.forEach({ a => game.addVisual(a)})})
 		game.schedule(10000, {=> portales.forEach({ p => game.addVisual(p)})})
 		game.schedule(15000, {=> saltosDoble.forEach({ d => game.addVisual(d)})})
@@ -123,18 +131,6 @@ class Imagen {
 
 }
 
-const fondo = new Imagen(position = game.origin(), image = "fondo.jpg")
-
-const titulo = new Imagen(position = game.at(5, 11), image = "titulo.png")
-
-const aspectos = new Imagen(position = game.origin(), image = "aspectos.png")
-
-const bot = new Imagen(position = game.at(1, 12), image = "bot.png")
-
-const infoReglas = new Imagen(position = game.origin(), image = "infoReglas.png")
-
-const infoCreadores = new Imagen(position = game.origin(), image = "infoCreadores.jpg")
-
 //SELECCIONAR OPCION
 class Seleccionar {
 
@@ -144,41 +140,18 @@ class Seleccionar {
 
 }
 
-//BOTONES
-const menuJugar = new Seleccionar(presione = "Tecla Space", position = game.at(4, 8), image = "jugar.jpg")
+//MOVIMIENTOS
+class Limites {
 
-const menuReglas = new Seleccionar(presione = "Tecla Enter", position = game.at(4, 5), image = "reglas.jpg")
+	const limiteArriba = 12
+	const limiteAbajo = -1
+	const limiteDerecha = 17
+	const limiteIzquierda = -1
 
-const menuCreadores = new Seleccionar(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.jpg")
-
-const finalizarJuego = new Seleccionar(presione = "Tecla control", position = game.at(5, 5), image = "finalizarJuego.png")
-
-//ASPECTOS
-const amongUsRojo1 = new Seleccionar(presione = 1, position = game.at(5, 7), image = "amongUsRojo.png")
-
-const amongUsVerde1 = new Seleccionar(presione = 2, position = game.at(7, 7), image = "amongUsVerde.png")
-
-const amongUsCeleste1 = new Seleccionar(presione = 3, position = game.at(9, 7), image = "amongUsCeleste.png")
-
-const amongUsArcoIris1 = new Seleccionar(presione = 4, position = game.at(11, 7), image = "amongUsArcoIris.png")
-
-const amongUsRojo2 = new Seleccionar(presione = 5, position = game.at(5, 4), image = "amongUsRojo.png")
-
-const amongUsVerde2 = new Seleccionar(presione = 6, position = game.at(7, 4), image = "amongUsVerde.png")
-
-const amongUsCeleste2 = new Seleccionar(presione = 7, position = game.at(9, 4), image = "amongUsCeleste.png")
-
-const amongUsArcoIris2 = new Seleccionar(presione = 8, position = game.at(11, 4), image = "amongUsArcoIris.png")
-
-//MAPAS CHIQUITOS
-const mapaChiquito1 = new Seleccionar(presione = "Tecla j", position = game.at(2, 5), image = "mapaChiquito1.jpg")
-
-const mapaChiquito2 = new Seleccionar(presione = "Tecla k", position = game.at(7, 5), image = "mapaChiquito2.jpg")
-
-const mapaChiquito3 = new Seleccionar(presione = "Tecla l", position = game.at(12, 5), image = "mapaChiquito3.jpg")
+}
 
 //JUGADORES
-class Jugador {
+class Jugador inherits Limites {
 
 	var property vida
 	var property position
@@ -187,6 +160,16 @@ class Jugador {
 	const property otroJugador
 	var property salto
 	const respawn
+	var property posicionPosible = position
+	var property corazones
+
+	method noPuedoMoverme() {
+		game.say(self, "No puedo moverme :(")
+	}
+
+	method dentroDeLimites() {
+		return self.posicionPosible().x() < limiteDerecha && self.posicionPosible().y() < limiteArriba && self.posicionPosible().x() > limiteIzquierda && self.posicionPosible().y() > limiteAbajo
+	}
 
 	method imagenJugador(personaje) {
 		image = personaje.image()
@@ -195,43 +178,49 @@ class Jugador {
 	}
 
 	method aArriba() {
-		if (turno > 0 && self.position().y() < 12) {
-			position = position.up(1)
-			turno = turno - 1
-			otroJugador.sumarTurno()
+		posicionPosible = position.up(1)
+		if (self.mePuedoMover()) {
+			self.moverse()
 		} else {
-			game.say(self, "No puedo moverme :(") // ya sea porque no es su turno o porque se estaria yendo del mapa
+			self.noPuedoMoverme()
 		}
 	}
 
 	method aLaDerecha() {
-		if (turno > 0 && self.position().x() < 16) {
-			position = position.right(1)
-			turno = turno - 1
-			otroJugador.sumarTurno()
+		posicionPosible = position.right(1)
+		if (self.mePuedoMover()) {
+			self.moverse()
 		} else {
-			game.say(self, "No puedo moverme :(")
+			self.noPuedoMoverme()
 		}
 	}
 
 	method aLaIzquierda() {
-		if (turno > 0 && self.position().x() > 0) {
-			position = position.left(1)
-			turno = turno - 1
-			otroJugador.sumarTurno()
+		posicionPosible = position.left(1)
+		if (self.mePuedoMover()) {
+			self.moverse()
 		} else {
-			game.say(self, "No puedo moverme :(")
+			self.noPuedoMoverme()
 		}
 	}
 
 	method aAbajo() {
-		if (turno > 0 && self.position().y() > 0) {
-			position = position.down(1)
-			turno = turno - 1
-			otroJugador.sumarTurno()
+		posicionPosible = position.down(1)
+		if (self.mePuedoMover()) {
+			self.moverse()
 		} else {
-			game.say(self, "No puedo moverme :(")
+			self.noPuedoMoverme()
 		}
+	}
+
+	method mePuedoMover() {
+		return turno > 0 && self.dentroDeLimites()
+	}
+
+	method moverse() {
+		position = posicionPosible
+		turno = turno - 1
+		otroJugador.sumarTurno()
 	}
 
 	method sumarTurno() {
@@ -259,29 +248,44 @@ class Jugador {
 	}
 
 	method caerse() {
-		if (vida == 1) {
+		self.quitarCorazon()
+		if (!self.murio()) self.moverseA(respawn)
+	}
+
+	method murio() {
+		return vida == 0
+	}
+
+	method quitarCorazon() {
+		vida -= 1
+		game.removeVisual(corazones.get(vida))
+		if (vida == 0) {
 			self.perder(copa)
-		} else {
-			self.moverseA(respawn)
-			vida -= 1
 		}
 	}
 
 	method sumarseVida() {
 		vida += 1
+		game.addVisual(corazones.get(vida - 1))
 	}
 
 }
 
-object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1, respawn = respawnJ1) {
+object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1, respawn = respawnJ1, corazones = [ corazonJ11, corazonJ12, corazonJ13 ]) {
 
 	method afectar(jugador) {
 		jugador.perder(cadaver)
+		game.say(self, "te atrape!")
+	}
+
+	override method ganar(premio) {
+		super(premio)
+		game.addVisual(p1Wins)
 	}
 
 }
 
-object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2) {
+object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2, corazones = [ corazonJ21, corazonJ22, corazonJ23 ]) {
 
 	var property movimientos = 0 // de esta manera sabemos cuantas veces se movio
 
@@ -294,7 +298,25 @@ object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0
 		if (movimientos == 50) {
 			otroJugador.perder(copa)
 			game.say(self, "AL FIN 50 MOVIMIENTOS!")
+			game.addVisual(p2Wins)
 		}
+	}
+
+	override method ganar(premio) {
+		super(premio)
+		game.addVisual(p2Wins)
+	}
+
+}
+
+//CORAZONES
+class Corazon {
+
+	const property position
+	const property image
+
+	method aparecer() {
+		game.addVisual(self)
 	}
 
 }
@@ -332,26 +354,11 @@ class Mapa {
 	}
 
 	method interacciones() {
+		// onTick
 		manchaMania.agregarInteraccion(agujeros, saltosDobles, portales, vidasExtra)
 	}
 
 }
-
-const mapa1 = new Mapa(position = game.origin(), image = "mapa1.jpg", agujeros = [ agujero1, agujero2, agujero4, agujero8, agujero6 ], saltosDobles = [ saltoDoble1, saltoDoble3 ], portales = [ portal1, destino1, portal2, destino2 ], vidasExtra = [ vidaExtra1, vidaExtra3 ])
-
-const mapa2 = new Mapa(position = game.origin(), image = "mapa2.jpg", agujeros = [ agujero1, agujero4, agujero3, agujero7 ], saltosDobles = [ saltoDoble2, saltoDoble5 ], portales = [ portal2, destino2, portal4, destino4 ], vidasExtra = [ vidaExtra2 ])
-
-const mapa3 = new Mapa(position = game.origin(), image = "mapa3.jpg", agujeros = [ agujero3, agujero5, agujero6, agujero8, agujero2 ], saltosDobles = [ saltoDoble1, saltoDoble2, saltoDoble4 ], portales = [ portal1, portal3, destino1, destino3 ], vidasExtra = [ vidaExtra3 ])
-
-class Respawn {
-
-	const property position = game.at(1, 11)
-
-}
-
-const respawnJ1 = new Respawn(position = game.origin())
-
-const respawnJ2 = new Respawn(position = game.at(14, 11))
 
 //INTERACCIONES
 class Agujeros {
@@ -364,22 +371,6 @@ class Agujeros {
 	}
 
 }
-
-const agujero1 = new Agujeros(position = game.at(4, 3), image = "agujero.png")
-
-const agujero2 = new Agujeros(position = game.at(7, 9), image = "agujero.png")
-
-const agujero3 = new Agujeros(position = game.at(2, 8), image = "agujero.png")
-
-const agujero4 = new Agujeros(position = game.at(8, 1), image = "agujero.png")
-
-const agujero5 = new Agujeros(position = game.at(5, 5), image = "agujero.png")
-
-const agujero6 = new Agujeros(position = game.at(10, 7), image = "agujero.png")
-
-const agujero7 = new Agujeros(position = game.at(11, 9), image = "agujero.png")
-
-const agujero8 = new Agujeros(position = game.at(2, 4), image = "agujero.png")
 
 class SaltoDoble {
 
@@ -394,16 +385,6 @@ class SaltoDoble {
 
 }
 
-const saltoDoble1 = new SaltoDoble(position = game.at(10, 4), image = "saltoDoble.png")
-
-const saltoDoble2 = new SaltoDoble(position = game.at(5, 8), image = "saltoDoble.png")
-
-const saltoDoble3 = new SaltoDoble(position = game.at(2, 9), image = "saltoDoble.png")
-
-const saltoDoble4 = new SaltoDoble(position = game.at(3, 6), image = "saltoDoble.png")
-
-const saltoDoble5 = new SaltoDoble(position = game.at(7, 9), image = "saltoDoble.png")
-
 class Portal {
 
 	const property position
@@ -416,14 +397,6 @@ class Portal {
 
 }
 
-const portal1 = new Portal(position = game.at(1, 3), image = "portal.png", destino = destino1)
-
-const portal2 = new Portal(position = game.at(9, 8), image = "portal.png", destino = destino2)
-
-const portal3 = new Portal(position = game.at(4, 12), image = "portal.png", destino = destino3)
-
-const portal4 = new Portal(position = game.at(8, 2), image = "portal.png", destino = destino4)
-
 class Destino {
 
 	const property position
@@ -434,14 +407,6 @@ class Destino {
 	}
 
 }
-
-const destino1 = new Destino(position = game.at(7, 12), image = "destino.png")
-
-const destino2 = new Destino(position = game.at(4, 8), image = "destino.png")
-
-const destino3 = new Destino(position = game.at(10, 2), image = "destino.png")
-
-const destino4 = new Destino(position = game.at(2, 9), image = "destino.png")
 
 class VidaExtra {
 
@@ -456,9 +421,9 @@ class VidaExtra {
 
 }
 
-const vidaExtra1 = new VidaExtra(position = game.at(9, 7), image = "corazon.png")
+class Respawn {
 
-const vidaExtra2 = new VidaExtra(position = game.at(8, 4), image = "corazon.png")
+	const property position = game.at(1, 11)
 
-const vidaExtra3 = new VidaExtra(position = game.at(3, 11), image = "corazon.png")
+}
 
