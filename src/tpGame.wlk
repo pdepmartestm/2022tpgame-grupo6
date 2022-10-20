@@ -292,9 +292,10 @@ object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0
 	method afectar(jugador) {
 	}
 
-	override method sumarTurno() {
+	override method moverse(){
 		super()
-		movimientos += 1
+		movimientos+=1
+		game.say(self,movimientos.toString()) //es medio lento el mensaje de los movimientos pero funciona
 		if (movimientos == 50) {
 			otroJugador.perder(copa)
 			game.say(self, "AL FIN 50 MOVIMIENTOS!")
