@@ -2,7 +2,6 @@ import tpGame.*
 import wollok.game.*
 
 program principal{
-	
 	manchaMania.menu()
 	game.start()
 }

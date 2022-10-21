@@ -10,11 +10,11 @@ object manchaMania {
 	const personajes = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1, amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
 	const property jugadores = [ jugador1, jugador2 ]
 	const property opciones = [ menuJugar, menuReglas, menuCreadores ]
+	var interaccionesIncluidas = false // para ver si todas las interacciones se agregaron
 
 	method menu() {
 		game.title("Mancha Mania")
 		game.boardGround("fondo.jpg")
-		game.addVisual(titulo)
 		game.height(13)
 		game.width(18)
 		game.addVisual(bot)
@@ -76,12 +76,11 @@ object manchaMania {
 
 	method mapa(mapaX) {
 		game.removeVisual(bot)
-		game.removeVisual(titulo)
 		game.removeVisual(mapaChiquito1)
 		game.removeVisual(mapaChiquito2)
 		game.removeVisual(mapaChiquito3)
 		game.addVisual(mapaX)
-		mapaX.interacciones()
+		mapaX.crearse()
 		game.addVisual(jugador1)
 		game.addVisual(jugador2)
 		game.addVisual(corazonJ11)
@@ -89,15 +88,25 @@ object manchaMania {
 		self.jugar()
 	}
 
-	method agregarInteraccion(agujeros, saltosDoble, portales, vidasExtra) {
-		// game.schedule(1000, {=> agregarUnVisual(colecciones))
-		game.schedule(5000, {=> agujeros.forEach({ a => game.addVisual(a)})})
-		game.schedule(10000, {=> portales.forEach({ p => game.addVisual(p)})})
-		game.schedule(15000, {=> saltosDoble.forEach({ d => game.addVisual(d)})})
-		game.schedule(20000, {=> vidasExtra.forEach({ v => game.addVisual(v)})})
+	method agregarInteraccion(colecciones) {
+		game.schedule(1000, {=> self.agregarUnVisual(colecciones)})
+	}
+
+	method agregarUnVisual(colecciones) {
+		game.onTick(2000, "agregar interaccion", {=> self.agregarElementoRandom(colecciones)})
+	}
+
+	method agregarElementoRandom(colecciones) {
+		var interaccion = colecciones.anyOne()
+		interaccion.aparecer(colecciones)
+		if (colecciones.isEmpty()) {
+			game.removeTickEvent("agregar interaccion")
+			interaccionesIncluidas = true
+		}
 	}
 
 	method fin() {
+		if (!interaccionesIncluidas) game.removeTickEvent("agregar interaccion")
 		game.addVisual(fondo)
 		game.addVisual(finalizarJuego)
 		game.showAttributes(finalizarJuego)
@@ -236,7 +245,7 @@ class Jugador inherits Limites {
 	method perder(premio) {
 		game.removeVisual(self)
 		otroJugador.ganar(premio)
-		game.schedule(10000, {=> manchaMania.fin()})
+		game.schedule(7000, {=> manchaMania.fin()})
 	}
 
 	method ganar(premio) {
@@ -292,15 +301,18 @@ object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0
 	method afectar(jugador) {
 	}
 
-	override method moverse(){
+	override method moverse() {
 		super()
-		movimientos+=1
-		game.say(self,movimientos.toString()) //es medio lento el mensaje de los movimientos pero funciona
+		movimientos += 1
+		self.multiploDeDiez()
 		if (movimientos == 50) {
 			otroJugador.perder(copa)
 			game.say(self, "AL FIN 50 MOVIMIENTOS!")
-			game.addVisual(p2Wins)
 		}
+	}
+
+	method multiploDeDiez() {
+		if (movimientos % 10 == 0) game.say(self, movimientos.toString()) // solo avisa cuando se mueve 10 veces
 	}
 
 	override method ganar(premio) {
@@ -316,8 +328,7 @@ class Corazon {
 	const property position
 	const property image
 
-	method aparecer() {
-		game.addVisual(self)
+	method afectar(jugador) { // de esta manera si colisionan no tira error
 	}
 
 }
@@ -346,23 +357,28 @@ class Mapa {
 
 	const property position
 	const property image
-	const property agujeros
-	const property saltosDobles
-	const property portales
-	const property vidasExtra
+	const property interacciones
 
 	method afectar(jugador) { // para evitar un mensaje de error
 	}
 
-	method interacciones() {
-		// onTick
-		manchaMania.agregarInteraccion(agujeros, saltosDobles, portales, vidasExtra)
+	method crearse() {
+		manchaMania.agregarInteraccion(interacciones)
 	}
 
 }
 
 //INTERACCIONES
-class Agujeros {
+class Aparicion {
+
+	method aparecer(colecciones) {
+		game.addVisual(self)
+		colecciones.remove(self)
+	}
+
+}
+
+class Agujeros inherits Aparicion {
 
 	const property position
 	const property image
@@ -373,7 +389,7 @@ class Agujeros {
 
 }
 
-class SaltoDoble {
+class SaltoDoble inherits Aparicion {
 
 	const property position
 	const property image
@@ -386,7 +402,7 @@ class SaltoDoble {
 
 }
 
-class Portal {
+class Portal inherits Aparicion {
 
 	const property position
 	const property image
@@ -396,9 +412,14 @@ class Portal {
 		jugador.moverseA(destino)
 	}
 
+	override method aparecer(colecciones) {
+		super(colecciones)
+		destino.aparecer(colecciones)
+	}
+
 }
 
-class Destino {
+class Destino inherits Aparicion {
 
 	const property position
 	const property image
@@ -409,7 +430,7 @@ class Destino {
 
 }
 
-class VidaExtra {
+class VidaExtra inherits Aparicion {
 
 	const property position
 	const property image

@@ -2,13 +2,13 @@ import wollok.game.*
 import tpGame.*
 
 //OPCIONES MENU
-const menuJugar = new Seleccionar(presione = "Tecla Space", position = game.at(4, 8), image = "jugar.jpg")
+const menuJugar = new Seleccionar(presione = "Tecla Space", position = game.at(4, 6), image = "jugar.png")
 
-const menuReglas = new Seleccionar(presione = "Tecla Enter", position = game.at(4, 5), image = "reglas.jpg")
+const menuReglas = new Seleccionar(presione = "Tecla Enter", position = game.at(4, 4), image = "reglas.png")
 
-const menuCreadores = new Seleccionar(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.jpg")
+const menuCreadores = new Seleccionar(presione = "Tecla Shift", position = game.at(4, 2), image = "creadores.png")
 
-const finalizarJuego = new Seleccionar(presione = "Tecla control", position = game.at(5, 5), image = "finalizarJuego.png")
+const finalizarJuego = new Seleccionar(presione = "Tecla control", position = game.at(3, 5), image = "finalizarJuego.png")
 
 //ASPECTOS
 const amongUsRojo1 = new Seleccionar(presione = 1, position = game.at(5, 7), image = "amongUsRojo.png")
