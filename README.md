@@ -29,7 +29,7 @@
 
 ## Reglas de Juego / Instrucciones
 
--2 jugadores
+- 2 jugadores
 - Cada jugador puede moverse una posicion en cualquier direccion, intercalando sus turnos
 - El jugador1 debe intentar atrapar al jugador2
 - El jugador2 debe intentar sobrevivir, alcanzando 50 movimientos
