@@ -12,6 +12,7 @@
 ![Menu](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Menu.png) 
 
 ### Reglas 
+![Reglas](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Reglas.png) 
 
 ### Creadores
 ![Creadores](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Creadores.png) 
