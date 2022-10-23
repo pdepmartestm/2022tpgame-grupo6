@@ -8,7 +8,23 @@
 
 ## Capturas
 
-(agregar)
+### Menu
+![Menu](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Menu.png) 
+
+### Reglas 
+
+### Creadores
+![Creadores](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Creadores.png) 
+
+### Aspectos
+![Aspectos](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Aspectos.png) 
+
+### Mapas
+![Mapas](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Mapas.png) 
+
+### Ejemplo de juego con interacciones ya cargas
+![Juego](https://github.com/pdepmartestm/2022tpgame-grupo6/blob/master/Capturas/Juego.png) 
+
 
 ## Reglas de Juego / Instrucciones
 
