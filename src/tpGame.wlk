@@ -8,9 +8,9 @@ import corazones.*
 object manchaMania {
 
 	const personajes = [ amongUsRojo1, amongUsVerde1, amongUsCeleste1, amongUsArcoIris1, amongUsRojo2, amongUsVerde2, amongUsCeleste2, amongUsArcoIris2 ]
-	const property jugadores = [ jugador1, jugador2 ]
-	const property opciones = [ menuJugar, menuReglas, menuCreadores ]
+	const opciones = [ menuJugar, menuReglas, menuCreadores ]
 	var interaccionesIncluidas = false // para ver si todas las interacciones se agregaron
+	var imagenActual
 
 	method menu() {
 		game.title("Mancha Mania")
@@ -21,15 +21,16 @@ object manchaMania {
 		opciones.forEach({ o => game.addVisual(o)})
 		game.say(bot, "Seleccione una Opcion, presione DEL para volver")
 		opciones.forEach({ o => game.showAttributes(o)})
-		game.showAttributes(bot)
 		keyboard.space().onPressDo({ self.elegirPersonajes()})
 		keyboard.enter().onPressDo({ self.mostrarReglas()})
 		keyboard.shift().onPressDo({ self.mostrarCreadores()})
+		keyboard.del().onPressDo({ self.volverAlMenu()})
 	}
 
 	method elegirPersonajes() {
 		game.addVisual(aspectos)
-		game.say(bot, "Elijan sus aspectos")
+		game.addVisual(continuar)
+		game.showAttributes(continuar)
 		personajes.forEach({ p => game.addVisual(p)})
 		personajes.forEach({ p => game.showAttributes(p)})
 		keyboard.num1().onPressDo({ jugador1.imagenJugador(amongUsRojo1)})
@@ -41,8 +42,7 @@ object manchaMania {
 		keyboard.num7().onPressDo({ jugador2.imagenJugador(amongUsCeleste2)})
 		keyboard.num8().onPressDo({ jugador2.imagenJugador(amongUsArcoIris2)})
 		keyboard.alt().onPressDo({ self.elegirMapa()})
-		keyboard.del().onPressDo({ game.removeVisual(aspectos)})
-		keyboard.del().onPressDo({ personajes.forEach({ p => game.removeVisual(p)})})
+		keyboard.alt().onPressDo({ game.removeVisual(continuar)})
 	}
 
 	method jugar() {
@@ -113,14 +113,22 @@ object manchaMania {
 		keyboard.control().onPressDo({ game.stop()})
 	}
 
+	method volverAlMenu(){
+		game.removeVisual(imagenActual)
+		game.removeVisual(volver)
+	}
 	method mostrarReglas() {
+		imagenActual = infoReglas
 		game.addVisual(infoReglas)
-		keyboard.del().onPressDo({ game.removeVisual(infoReglas)})
+		game.addVisual(volver)
+		game.showAttributes(volver)
 	}
 
 	method mostrarCreadores() {
+		imagenActual = infoCreadores
 		game.addVisual(infoCreadores)
-		keyboard.del().onPressDo({ game.removeVisual(infoCreadores)})
+		game.addVisual(volver)
+		game.showAttributes(volver)
 	}
 
 	method quitarDeLista(personaje) {
@@ -162,15 +170,15 @@ class Limites {
 //JUGADORES
 class Jugador inherits Limites {
 
-	var property vida
+	var vida
 	var property position
 	var property image = ""
 	var property turno
-	const property otroJugador
-	var property salto
+	const otroJugador
+	var salto
 	const respawn
 	var property posicionPosible = position
-	var property corazones
+	var corazones
 
 	method noPuedoMoverme() {
 		game.say(self, "No puedo moverme :(")
@@ -294,9 +302,9 @@ object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, 
 
 }
 
-object jugador2 inherits Jugador(vida = 1, position = game.at(14, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2, corazones = [ corazonJ21, corazonJ22, corazonJ23 ]) {
+object jugador2 inherits Jugador(vida = 1, position = game.at(15, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2, corazones = [ corazonJ21, corazonJ22, corazonJ23 ]) {
 
-	var property movimientos = 0 // de esta manera sabemos cuantas veces se movio
+	var movimientos = 0 // de esta manera sabemos cuantas veces se movio
 
 	method afectar(jugador) {
 	}
