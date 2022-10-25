@@ -1,8 +1,7 @@
+import tpGame.*
 import wollok.game.*
-import pepita.*
 
-program juego {
-	game.title("Juego Base")
-	game.addVisual(pepita)
+program principal{
+	manchaMania.menu()
 	game.start()
 }
