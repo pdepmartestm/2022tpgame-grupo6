@@ -113,10 +113,11 @@ object manchaMania {
 		keyboard.control().onPressDo({ game.stop()})
 	}
 
-	method volverAlMenu(){
+	method volverAlMenu() {
 		game.removeVisual(imagenActual)
 		game.removeVisual(volver)
 	}
+
 	method mostrarReglas() {
 		imagenActual = infoReglas
 		game.addVisual(infoReglas)
@@ -179,6 +180,7 @@ class Jugador inherits Limites {
 	const respawn
 	var property posicionPosible = position
 	var corazones
+	const imagenTriunfal
 
 	method noPuedoMoverme() {
 		game.say(self, "No puedo moverme :(")
@@ -247,17 +249,18 @@ class Jugador inherits Limites {
 	}
 
 	method dobleTurno() {
-		salto *= 2 // por alguna razon se mueve 4 veces en lugar de 2
+		salto *= 2
 	}
 
 	method perder(premio) {
 		game.removeVisual(self)
 		otroJugador.ganar(premio)
-		game.schedule(7000, {=> manchaMania.fin()})
 	}
 
 	method ganar(premio) {
 		game.addVisualCharacterIn(premio, self.position())
+		game.schedule(3000, {=> self.agregarImagenTriunfal()})
+		game.schedule(7000, {=> manchaMania.fin()})
 	}
 
 	method moverseA(destino) {
@@ -286,23 +289,22 @@ class Jugador inherits Limites {
 		game.addVisual(corazones.get(vida - 1))
 	}
 
+	method agregarImagenTriunfal() {
+		game.addVisual(imagenTriunfal)
+	}
+
 }
 
-object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1, respawn = respawnJ1, corazones = [ corazonJ11, corazonJ12, corazonJ13 ]) {
+object jugador1 inherits Jugador(vida = 1, position = game.origin(), turno = 1, otroJugador = jugador2, salto = 1, respawn = respawnJ1, corazones = [ corazonJ11, corazonJ12, corazonJ13 ], imagenTriunfal = p1Wins) {
 
 	method afectar(jugador) {
 		jugador.perder(cadaver)
 		game.say(self, "te atrape!")
 	}
 
-	override method ganar(premio) {
-		super(premio)
-		game.addVisual(p1Wins)
-	}
-
 }
 
-object jugador2 inherits Jugador(vida = 1, position = game.at(15, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2, corazones = [ corazonJ21, corazonJ22, corazonJ23 ]) {
+object jugador2 inherits Jugador(vida = 1, position = game.at(15, 11), turno = 0, otroJugador = jugador1, salto = 1, respawn = respawnJ2, corazones = [ corazonJ21, corazonJ22, corazonJ23 ], imagenTriunfal = p2Wins) {
 
 	var movimientos = 0 // de esta manera sabemos cuantas veces se movio
 
@@ -323,11 +325,6 @@ object jugador2 inherits Jugador(vida = 1, position = game.at(15, 11), turno = 0
 		if (movimientos % 10 == 0) game.say(self, movimientos.toString()) // solo avisa cuando se mueve 10 veces
 	}
 
-	override method ganar(premio) {
-		super(premio)
-		game.addVisual(p2Wins)
-	}
-
 }
 
 //CORAZONES
@@ -342,23 +339,18 @@ class Corazon {
 }
 
 //PREMIOS
-object cadaver {
+class Premio {
 
-	const property image = "cadaver.png" // estaria bueno que cada color tenga su cadaver, pero no encontre imagenes png de todos
-
-	method afectar(jugador) { // de esta manera cuando aparece al final, no salta el mensaje de error
-	}
-
-}
-
-object copa {
-
-	const property image = "trofeo.png"
+	const property image
 
 	method afectar(jugador) { // de esta manera cuando aparece al final, no salta el mensaje de error
 	}
 
 }
+
+const cadaver = new Premio(image = "cadaver.png")
+
+const copa = new Premio(image = "trofeo.png")
 
 //MAPAS
 class Mapa {
